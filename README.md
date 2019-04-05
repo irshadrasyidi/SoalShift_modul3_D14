@@ -140,5 +140,41 @@ else if(dis_agmal == 0){
 
 
 ## Soal 4
+- Pada soal 4, ada 3 thread yang akan dipanggil:
+  - `ps` : thread ini menjalankan perintah untuk menampilkan 10 proses teratas dan disimpan ke folder dan file .txt yang diinginkan (1 atau 2, tergantung argumen pembuatan thread)
+  ```
+  ps -aux | head -11 | tail -10 > ~/Documents/FolderProses%d/SimpanProses%d.txt
+  ```
+  - `kompres` : thread ini menjalankan perintah untuk mengompres file .txt pada thread sebelumnya ke sebuah file .zip yang diinginkan (1 atau 2, tergantung argumen pembuatan thread) dan sekaligus menghapus file .txt sebelumnya
+  ```
+  zip -m -j -q ~/Documents/FolderProses%d/KompresProses%d.zip ~/Documents/FolderProses%d/SimpanProses%d.txt
+  ```
+  - `unzip` : thread ini menjalankan perintah untuk mengekstrak file .zip yang diinginkan (1 atau 2, tergantung argumen pembuatan thread) yang pada thread sebelumnya sudah dibuat
+  ```
+  unzip -q ~/Documents/FolderProses%d/KompresProses%d.zip -d ~/Documents/FolderProses%d/
+  ```
+- Pemanggilan thread cukup dilakukan berurutan dan ditutup dengan `pthread_join`, dengan menyelipkan sleep(15) disela-sela pemanggilan thread ke-2 dan ke-3, karena pengekstrakan dilakukan 15 detik setelah dibuat .zip-nya
+```
+pthread_create(&tid[0], NULL, &kompres, (void*)&file1);
+	pthread_create(&tid[1], NULL, &kompres, (void*)&file2);
+	pthread_join(tid[0], NULL);
+	pthread_join(tid[1], NULL);
+
+	printf("Menunggu 15 detik untuk mengekstrak kembali\n");
+	sleep(15);
+	
+	pthread_create(&tid[0], NULL, &unzip, (void*)&file1);
+	pthread_create(&tid[1], NULL, &unzip, (void*)&file2);
+	pthread_join(tid[0], NULL);
+	pthread_join(tid[1], NULL);
+```
+- Pada saat setiap pemanggilan thread, argumen dimasukkan sebuah integer sebagai pembeda untuk proses 1 dan 2
+```
+int* file1 = (int*)1;
+int* file2 = (int*)2;
+pthread_create(&tid[0], NULL, &unzip, (void*)&file1);
+pthread_create(&tid[1], NULL, &unzip, (void*)&file2);
+```
+
 
 ## Soal 5
