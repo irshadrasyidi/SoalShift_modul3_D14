@@ -23,9 +23,6 @@ void* agmal_bangun(void *arg){
 			dis_agmal = 1;
 			f_iraj = 0;
 		}
-		if(dis_agmal == 1){
-			
-		}
 	}
 }
 
@@ -35,9 +32,6 @@ void* iraj_tidur(void *arg){
 			mulai_dis_iraj = waktu;
 			dis_iraj = 1;
 			f_agmal = 0;
-		}
-		if(dis_iraj == 1){
-			
 		}
 	}
 }
