@@ -48,7 +48,8 @@ for(i = 0; i < argc - 1; i++){
 
 
 ## Soal 2
-
+Tidak selesai
+Bingung saat akan mengimplementasikan soal ke contoh codingan socket client/server pada modul, dan waktunya habis di ngotak-ngatik nomor 5
 
 
 
