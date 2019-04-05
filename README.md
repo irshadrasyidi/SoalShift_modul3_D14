@@ -179,3 +179,5 @@ pthread_create(&tid[1], NULL, &unzip, (void*)&file2);
 
 
 ## Soal 5
+Tidak selesai
+Buntu di cara inputan yang otomatis (tanpa tekan enter) dan system clear yang digabungkan dengan saat menerima inputan, waktu dicoba outputnya jadi aneh dan saat digunakan system clear, inputan yang dimasukkan tidak terbaca, sehingga terhambat saat akan melanjutkan ke pengerjaan dan testing fitur2nya
