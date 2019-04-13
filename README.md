@@ -51,7 +51,84 @@ for(i = 0; i < argc - 1; i++){
 Tidak selesai
 Bingung saat akan mengimplementasikan soal ke contoh codingan socket client/server pada modul, dan waktunya habis di ngotak-ngatik nomor 5
 
+REVISI:
+- Pada nomor 2, diperlukan 2 server dan 2 klien untuk menjalankan transaksinya
+- Masing2 klien terhubung dengan masing2 servernya dengan port yang dispesifikasikan dan antara pembeli dan penjual harus berbeda
+  - Pada server dan klien pembeli digunakan `PORT 8088`
+  - Pada server dan klien penjual digunakan `PORT 9099`
+- Lalu, supaya stok antara penjual dan pembeli sama, maka digunakan shared memory dengan key yang sama, dan diletakkan di kedua file server
+```
+key_t key = 1234;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+stok = shmat(shmid, NULL, 0);
+```
+- Klien beli dan Klien jual, hanya bertugas menerima inputan string "beli" untuk klien pembeli dan "tambah" untuk klien penjual
+```
+while(1){
+	scanf("%s", buy);
+	if(strcmp(buy, "beli") == 0){
+		send(sock, buy, strlen(buy), 0);
+		valread = read(sock, buffer, 1024);
+		printf("%s\n", buffer);
+	}
+	else{
+		printf("string tidak dikenal\n");
+	}
 
+	memset(buy, 0, 50);
+	memset(buffer, 0, 1024);
+}
+```
+- Di atas adalah contoh pada klien pembeli, fungsi `send()` akan mengirim string `buy` ke server
+- Lalu fungsi `read()` akan membaca balasan dari server yang menggunakan wadah string `buffer`
+- Pada server pembeli, dibuat sebuah fungsi thread untuk transaksi beli, dengan membaca string `buffer` kiriman dari klien
+```
+while((valread = read(new_socket ,buffer, 1024)) > 0){
+		if(!strcmp(buffer, "beli")){
+			if(*stok <= 0){
+				strcpy(buy, "transaksi gagal");
+				send(new_socket, buy, strlen(buy), 0);	
+			}
+			else{	
+				*stok -= 1;
+				strcpy(buy, "transaksi berhasil");
+				send(new_socket, buy, strlen(buy), 0);
+			}
+		}
+		memset(buy, 0, 50);
+		memset(buffer, 0, 1024);
+}
+```
+- Jika benar stringnya adalah "beli", maka dicek lagi jika stoknya kosong, maka `transaksi gagal`, tapi jika stok ada, maka stok
+akan berkurang 1
+- Pemanggilan thread akan dilakukan di dalam sebuah loop, tapi dapat dipastikan klien yang diterima hanya 1 karena fungsi `accept` dijalankan di luar loop, dan jika thread sudah dijalankan, ada integer `cekkon` sebagai flag supaya thread hanya berjalan 1 kali saja
+- Jangan lupa untuk mengirim pesan string bahwa transaksi gagal/berhasil ke klien menggunakan fungsi `send()` pada masing2 `if`
+- Pada server penjual, ada 2 fungsi thread yang dijalankan yaitu `cetakstok` dan `jual`
+- Pada `cetakstok`, fungsi akan mengeprint stok setiap 3 detik
+```
+void* cetakstok(void *arg){
+	while(1){
+		printf("stok barang = %d\n", *stok);
+		sleep(3);
+	}
+}
+```
+- Pada `jual`, fungsi ini bekerja untuk mengecek apakah ada string "tambah" yang diterima dari klien
+```
+void* jual(void* sock){
+	int new_socket = *(int*)sock;
+	char buffer[1024] = {0};
+	int valread;
+	while((valread = read(new_socket ,buffer, 1024)) > 0){
+		if(!strcmp(buffer, "tambah")){
+			*stok += 1;
+		}
+		memset(buffer, 0, 1024);
+	}
+}
+```
+- Jika benar, maka stok akan ditambah 1
+- Untuk pemanggilan threadnya, sama seperti pada server pembeli, yaitu menggunakan flag `cekkon` sehingga dapat dipastika klien yang terhubung hanya 1
 
 ## Soal 3
 - Di nomor 3, digunakan 3 thread:
