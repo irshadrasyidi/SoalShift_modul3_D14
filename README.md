@@ -335,4 +335,95 @@ if(inp == '1') {
 		printf("stok habis\n");
 }
 ```
-  
+- Lalu, jika yang diinginkan opsi untuk mandi, maka actionnya sebagai berikut
+```
+else if(inp == '2'){
+	if(cooldownbath == 0 || i - cooldownbath > 20) {
+		cooldownbath = i;
+		printf("Bath is ready\n");
+		hygiene += 30;
+	}
+	else{
+		printf("Bath will be ready in %ds\n", cooldownbath + 20 - i);
+	}
+}
+```
+- Dapat dilihat pengecekan cooldownnya dengan memanfaatkan counter `i` yang ada di thread `basetime`
+- Lalu, untuk opsi 3, user akan masuk ke battlemode, dengan men-set dulu health dari enemy-nya jadi 100 dulu, lalu set `status` mejadi 0 supaya thread2 `eat`, `bath`, dan `regen` sementara berhenti
+```
+else if(inp == '3'){
+	enemyhealth = 100;
+	system("clear");
+	status = 0;
+
+	battlemode();
+}
+```
+- Pada `battlemode()` ada 2 opsi: Attack dan Run
+- Jika attack, maka dilakukan action2 berikut, sesuai yang diminta pada soal
+```
+if(inp == '1'){
+	enemyhealth -= 20;
+	health -= 20;
+	if(health <= 0){
+		printf("%s kalah hiya3x\n", nama);
+		sleep(1);
+		system("clear");
+		exit(-1);
+	}
+
+	if(enemyhealth <= 0){
+		printf("%s menang\n", nama);
+		sleep(1);
+		system("clear");
+		status = 1;
+
+		standbymode();
+	}
+} 
+```
+- Jika health kita habis, maka kalah dan langsung exit. Jika health musuh yang habis, maka menang dan kembali ke `standbymode()`
+- Jika opsi 2 (run), maka akan langsung kembali ke `standbymode()`
+```
+else if(inp == '2'){
+	printf("kaboor\n");
+	sleep(1);
+	system("clear");
+
+	standbymode();
+}
+```
+- Untuk shopmode, ada 2 opsi: Buy dan Back
+- Untuk Buy, maka akan dicek dulu stok makan toko, apakah ada atau tidak. Jika ada maka stok makan toko berkurang, dan stok makan monster bertambah. Jika stok makan toko tidak ada, maka transaksi gagal
+```
+if(inp == '1'){
+	if(*stokmakantoko > 0) {
+		printf("Transaksi berhasil\n");
+		*stokmakantoko = *stokmakantoko - 1;
+		stokmakan++;
+	}
+	else printf("Transaksi gagal\n");
+} 
+```
+- Untuk back, maka langsung kembali ke `standbymode()`
+```
+else if(inp == '2'){
+	printf("kembali\n");
+	sleep(1);
+	system("clear");
+	status = 1;
+
+	standbymode();
+}
+```
+- Pada program toko-nya, dibuat juga fungsi penerima input `kbhit()` supaya input tanpa enter
+- Lalu, ada juga thread `inshopmode` yang akan masuk ke loop `while(1)` yang berfungsi hanya tampilan pada terminal
+- Pada main, thread dipanggil terlebih dahulu, supaya bisa menampilkan tampilannya shop
+- Lalu, ada pengecekan inputannya opsi yang dipilih: 1 untuk menambah stok toko, 2 untuk exit
+- Jika opsi 1 dipilih maka stok makan toko ditambah
+```
+if(inp == '1'){
+	*stokmakantoko = *stokmakantoko + 1;
+}
+```
+- Ingat, variabel stok makan toko sudah digunakan pada shared memory sehingga dapat dilihat juga pada program utama
