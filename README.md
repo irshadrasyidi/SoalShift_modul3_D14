@@ -258,3 +258,81 @@ pthread_create(&tid[1], NULL, &unzip, (void*)&file2);
 ## Soal 5
 Tidak selesai
 Buntu di cara inputan yang otomatis (tanpa tekan enter) dan system clear yang digabungkan dengan saat menerima inputan, waktu dicoba outputnya jadi aneh dan saat digunakan system clear, inputan yang dimasukkan tidak terbaca, sehingga terhambat saat akan melanjutkan ke pengerjaan dan testing fitur2nya
+REVISI:
+- Pada soal 5, diminta ada 3 scene yang merupakan `standbymode`, `battlemode`, dan `shopmode` dengan tampilan sesuai pada soal
+- Selain tampilan, di dalam 3 fungsi itu juga ada banyak `if` pengecekan inputan opsi dengan masing2 di dalamnya adalah action jika opsi tersebut dipilih
+- Pengambilan inputan opsi menggunakan sebuah fungsi `kbhit()` yang memungkinkan user memberi inputan tanpa klik `enter`
+- Pada fungsi 3 scene ini, dia akan langsung masuk ke loop `while(1)` dengan di bagian akhir ada `system("clear")` supaya tampilan pada terminal bersih
+- Pada program ini dibuat juga 4 thread berikut:
+  - `basetime` : sebuah fungsi penghitungan waktu secara manual menggunakan sebuah counter yang diincrement dan di-sleep 1 detik
+  ```
+  i = 1;
+	while(1) {
+		i++;
+		sleep(1);
+  }
+  ```
+  - `eat` : fungsi thread yang akan mengurangi hunger status setiap 10 detik
+  ```
+  while(1){
+	while(status == 0){}
+	hunger -= 5;
+	sleep(3);
+	//sleep(10);
+  }
+  ```
+  - `bath` : fungsi thread yang akan mengurangi hygiene status setiap 30 detik
+  ```
+  while(1){
+	while(status == 0){}
+	hygiene -= 10;
+	sleep(6);
+	//sleep(30);
+  }
+  ```
+  - `regen` : fungsi thread yang akan menambah health status setiap 10 detik
+  ```
+  while(1){
+	while(status == 0){}
+	health += 5;
+	sleep(3);
+	//sleep(10);
+  }
+  ```
+  (Note: nama fungsi tidak berkorelasi dengan fungsi sebenarnya, hanya penamaannya saja)
+  (Note: detik sleep yang diaktifkan bukan yang diminta pada soal, supaya waktu dicek tidak perlu menunggu terlalu lama)
+- Pada awal program, diminta inputan string untuk nama monster
+- Lalu, dipanggil 4 thread yang tadi sudah deklarasikan
+- Setelah thread dipanggil, panggil fungsi `standbymode()` sebagai scene default program
+- Pada program ini juga digunakan shared memory yang merupakan stok makanan toko untuk digunakan juga di program lain yaitu `shop`
+```
+key_t key = 1234;
+	int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+stokmakantoko = shmat(shmid, NULL, 0);
+```
+- Berikut adalah action2 yang dijalankan jika monster ingin diberi makan (opsi 1)
+```
+if(inp == '1') {
+	if(stokmakan > 0){
+		if(hunger >= 200){
+			printf("Full\n");
+		}
+		else if(stokmakan -15 < 0){
+			hunger += stokmakan;
+			stokmakan = 0;
+		}
+		else{
+			stokmakan -= 15;
+			hunger += 15;
+		}
+
+		if(hunger > 200) {
+			stokmakan += (hunger-200);
+			hunger = 200;
+		}
+	}
+	else{
+		printf("stok habis\n");
+}
+```
+  
